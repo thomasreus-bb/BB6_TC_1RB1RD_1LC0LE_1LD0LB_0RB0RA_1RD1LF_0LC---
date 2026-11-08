@@ -1,0 +1,3 @@
+RESTART step 26735911821080026413068533212 cells from head 197113627881536 min cells right of head in the previous cycle None
+RESTART step 26740038083465633684558659926 cells from head 199541821757230 min cells right of head in the previous cycle 197113627878200
+RESTART step 26744164345851240956048786640 cells from head 201970015632924 min cells right of head in the previous cycle 199541821753920

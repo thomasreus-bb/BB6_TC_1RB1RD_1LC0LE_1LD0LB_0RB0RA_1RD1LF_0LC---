@@ -1,0 +1,5 @@
+restart 0 step 26735911821080026413068533212 state C cells from head 197113627881536 | min cells right of head since previous restart None
+restart 1 step 26740038083465633684558659926 state C cells from head 199541821757230 | min cells right of head since previous restart 197113627878200
+restart 2 step 26744164345851240956048786640 state C cells from head 201970015632924 | min cells right of head since previous restart 199541821753920
+cycle 0->1: period 4126262385607271490126714 steps, shift 2428193875694 cells, visited W=3436 of 197113627881536 cells; states equal; first 3436 cells: EQUAL
+cycle 1->2: period 4126262385607271490126714 steps, shift 2428193875694 cells, visited W=3410 of 199541821757230 cells; states equal; first 3410 cells: EQUAL

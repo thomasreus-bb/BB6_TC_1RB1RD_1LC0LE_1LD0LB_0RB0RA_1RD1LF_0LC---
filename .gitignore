@@ -1,0 +1,7 @@
+__pycache__/
+sim/at48
+sim/step48
+sim/steps48.txt
+sim/restarts.pkl
+sim/phases.txt
+sim/type_*.pkl
