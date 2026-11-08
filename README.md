@@ -10,7 +10,7 @@
 | consequence | the machine never halts |
 | status | found with an accelerated simulator; **not yet independently confirmed** (see [What is not proved](#what-is-not-proved)) |
 
-Found by Thomas Reus with Claude (Anthropic), 8 Nov 2026, while studying the BB(6) holdouts in [bb6-vampire-family](https://github.com/thomasreus-bb/bb6-vampire-family-1RB0LA_0RC0RB_1LD1LA_1LC1RE_1RF0RD_1LC---) (candidate no. 48 there).
+Found by Thomas Reus with Claude (Anthropic), 8 Nov 2026
 
 ## Size compared with Skelet #1
 
