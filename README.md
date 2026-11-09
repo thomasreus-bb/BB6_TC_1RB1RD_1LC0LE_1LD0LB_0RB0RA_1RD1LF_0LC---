@@ -8,7 +8,7 @@
 | shift | the tape grows by **2,428,193,875,694 cells** to the left per period |
 | cells read in a period | at most **3,336 cells** right of the left edge at the start of the period |
 | consequence | the machine never halts |
-| status | found with an accelerated simulator; **not yet independently confirmed** (see [What is not proved](#what-is-not-proved)) |
+| status | **proved in Rocq** (Coq 8.20.1, busycoq branch BB6): `rocq/PR_LongTranslatedCycler.v`, theorem `nonhalt : ~ halts tm c0`, no axioms (see [Rocq proof](#rocq-proof)) |
 
 Found by Thomas Reus with Claude (Anthropic), 8 Nov 2026
 
@@ -97,19 +97,41 @@ A restart cycle is skipped the same way, but this is not used for the result: th
 
 Checks against direct simulation (`chk48.py`, `at48.c`): at 260 random event times up to 5·10¹⁰ steps the tape, state and step count agree exactly. The phase starts agree with an independent direct run (`ph48.c`) up to 5·10¹⁰ steps, and with a run using 120-cell blocks up to 5.9·10¹³ steps.
 
-## What is not proved
+## Rocq proof
 
-- The loop skipping in `msim48.py` is a heuristic: a skipped loop is assumed to repeat exactly, and that assumption is not checked when it is applied. It is checked against direct simulation only up to 5·10¹⁰ steps, but the result depends on about 2.67·10²⁸ simulated steps.
+`rocq/` contains a complete, axiom-free proof that the machine does not halt, written for [busycoq](https://github.com/ccz181078/busycoq) (branch `BB6`, tested with Coq 8.20.1).
+
+- **`RWLAccT.v`.** A variant of busycoq's verified accelerated simulator `RWLAcc.v` (block-run tapes, chain steps, verified loop acceleration). Two changes:
+  - The right end of the tape is an *arbitrary* side `rt`. Popping past the known part of the right side fails, so a successful run proves that `rt` is never read.
+  - It can start from any configuration.
+
+  All of RWLAcc's correctness lemmas are re-proved for this setting.
+- **`PR_LongTranslatedCycler.v`.** The proof for this machine:
+  - `S` is the 4800 cells at a restart (`S48_runs`), and `cfg R = 0^inf {{C}}> S *> R`.
+  - `pre`: the blank tape reaches `cfg R0` for some `R0`. RWLAccT runs 130,037 macro steps from the blank tape (its right end given as a run of 10²⁰ zero blocks). A bounded cell-level search (`find_bounded`) then reaches the restart record.
+  - `cycle`: for **every** `R`, `cfg R` reaches `cfg R'` for some `R'`, in 199,821 macro steps plus a bounded search, without reading `R`.
+  - `nonhalt`: by `progress_nonhalt` with the invariant `exists R, c = cfg R`.
+
+  The two computations are checked by the kernel's virtual machine (`vm_cast_no_check`), in about 8 s and 13 s. `Print Assumptions nonhalt` prints `Closed under the global context`.
+
+So the Rocq proof does not depend on the Python simulators. It checks the restart and the cycle itself, from the machine's transition table.
+
+To check: `bash rocq/check.sh /path/to/busycoq` (a checkout of the `BB6` branch). It copies the three files into `verify/`, builds the needed busycoq modules and the proof, and prints the assumptions.
+
+## How the cycle was found (simulation)
+
+- This section is about the Python simulators only; the Rocq proof above does not rely on them. The loop skipping in `msim48.py` is a heuristic: a skipped loop is assumed to repeat exactly, and that assumption is not checked when it is applied. It is checked against direct simulation only up to 5·10¹⁰ steps, but the result depends on about 2.67·10²⁸ simulated steps.
 - The excursion bound W is sampled whenever the head turns from right to left in a macro step, with one block (40 cells) of safety. Inside skipped loops the deepest point is taken from the iterations simulated after the skip. A margin of 100 cells is added in the comparison.
 
-Two ways to make it a proof:
-1. **Independent simulation.** Reach the configuration of restart 0 with another simulator (exact step count and tape as in `data/restart_configs.txt`), then simulate one period and check the Lin condition.
-2. **Certificate.** Verify one period from the stored restart 0 configuration in a proof assistant, plus the fact that this configuration is reached.
+Both points are settled by the Rocq proof.
 
 ## Files
 
 | file | content |
 |---|---|
+| `rocq/RWLAccT.v`, `rocq/RWLAccT62.v` | verified accelerated simulator with an arbitrary, never-read right end (variant of busycoq's RWLAcc) |
+| `rocq/PR_LongTranslatedCycler.v` | the non-halting proof (`nonhalt`) |
+| `rocq/check.sh` | builds and checks the proof inside a busycoq checkout |
 | `sim/msim48.py` | accelerated simulator (block runs, chain steps, loop skipping, cell-by-cell left edge) |
 | `sim/phase48m.py` | real run, lists every phase start; with `TCDUMP=file` it stores the restart tapes and excursions |
 | `sim/tccheck.py` | exact Lin recurrence check from the stored restart tapes |
